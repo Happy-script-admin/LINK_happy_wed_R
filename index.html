@@ -1,7 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAPTCHA Verification</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f2f2f2;
+        }
+        .captcha-container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+        canvas {
+            display: block;
+            margin: 10px auto;
+            border: 1px solid black;
+        }
+        input {
+            padding: 10px;
+            width: 150px;
+            font-size: 16px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        button {
+            display: block;
+            margin: 15px auto;
+            padding: 12px 20px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            border-radius: 5px;
+        }
+        #verifyButton {
+            background-color: #00CC00;
+            color: white;
+        }
+        #verifyButton:hover {
+            transform: scale(1.1);
+        }
+        #verifyButton.loading {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+        #verifyButton.continue {
+            background-color: #0033FF;
+        }
+        #verifyButton.continue:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="captcha-container">
+        <h2>HAPPY script</h2>
+        <p>Enter the code shown below to continue:</p>
+        <canvas id="captchaCanvas" width="300" height="120"></canvas>
+        <input type="text" id="captchaInput" placeholder="Enter CAPTCHA...">
+        <button id="verifyButton">OK</button>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             function generateCaptcha() {
@@ -9,30 +76,26 @@
                 let ctx = canvas.getContext("2d");
                 let numbers = "0123456789";
                 let captcha = "";
-
+                
                 for (let i = 0; i < 7; i++) {
                     captcha += numbers.charAt(Math.floor(Math.random() * numbers.length));
                 }
-
-                canvas.width = 200;
-                canvas.height = 80;
-
-                // Tạo background có texture nhiễu
+                
+                canvas.width = 300;
+                canvas.height = 120;
+                
                 ctx.fillStyle = "lightgray";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                let fonts = ["bold 38px Arial", "italic 40px Verdana", "bold 39px Courier New"];
+                let fonts = ["bold 40px Arial", "italic 38px Verdana", "bold 42px Courier", "italic 36px Times", "bold 43px Georgia"];
+                ctx.fillStyle = "black";
                 ctx.textBaseline = "middle";
                 
                 for (let i = 0; i < captcha.length; i++) {
-                    let x = 15 + i * 25;
-                    let y = 40 + Math.random() * 20 - 10;  // Rung nhẹ vị trí chữ
-                    let angle = Math.random() * 1.2 - 0.6;  // Nghiêng mạnh hơn
-                    ctx.font = fonts[Math.floor(Math.random() * fonts.length)];
-                    
-                    // Tạo độ trong suốt khác nhau cho mỗi chữ số
-                    ctx.fillStyle = `rgba(0, 0, 0, ${0.6 + Math.random() * 0.4})`;
-                    
+                    let x = 30 + i * 35;
+                    let y = 60 + Math.random() * 20 - 10;
+                    let angle = Math.random() * 0.6 - 0.3;
+                    ctx.font = fonts[i % fonts.length];
                     ctx.save();
                     ctx.translate(x, y);
                     ctx.rotate(angle);
@@ -40,34 +103,40 @@
                     ctx.restore();
                 }
                 
-                // Thêm đường nhiễu ngẫu nhiên
                 for (let i = 0; i < 15; i++) {
-                    ctx.strokeStyle = `rgba(0,0,0,${Math.random() * 0.5 + 0.2})`;
+                    ctx.strokeStyle = "rgba(0,0,0,0.3)";
                     ctx.beginPath();
                     ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
                     ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
                     ctx.stroke();
                 }
-
-                // Thêm chấm nhiễu
-                for (let i = 0; i < 150; i++) {
-                    let x = Math.random() * canvas.width;
-                    let y = Math.random() * canvas.height;
-                    ctx.fillStyle = `rgba(0, 0, 0, ${Math.random() * 0.5})`;
-                    ctx.fillRect(x, y, 2, 2);
-                }
-
+                
                 document.getElementById("captchaInput").value = "";
                 return captcha;
             }
-
+            
             let currentCaptcha = generateCaptcha();
             let encodedLink = atob("aHR0cHM6Ly9zaXRlcy5nb29nbGUuY29tL3ZpZXcvaGFwcHktc2NyaXB0L2hvbWU="); // https://sites.google.com/view/happy-script/home
-
+            
             document.getElementById("verifyButton").addEventListener("click", function () {
                 let userInput = document.getElementById("captchaInput").value;
+                let verifyButton = document.getElementById("verifyButton");
+
                 if (userInput == currentCaptcha) {
-                    window.location.href = encodedLink;
+                    verifyButton.innerText = "Checking...";
+                    verifyButton.classList.add("loading");
+                    verifyButton.disabled = true;
+
+                    setTimeout(() => {
+                        verifyButton.innerText = "Continue";
+                        verifyButton.classList.remove("loading");
+                        verifyButton.classList.add("continue");
+                        verifyButton.disabled = false;
+
+                        verifyButton.addEventListener("click", function () {
+                            window.location.href = encodedLink;
+                        });
+                    }, 2000);
                 } else {
                     alert("Incorrect CAPTCHA! Please try again.");
                     currentCaptcha = generateCaptcha();
@@ -75,13 +144,5 @@
             });
         });
     </script>
-</head>
-<body>
-    <h2>CAPTCHA Verification</h2>
-    <p>Enter the code shown below to continue:</p>
-    <canvas id="captchaCanvas" width="200" height="80" style="border:1px solid #000;"></canvas>
-    <br><br>
-    <input type="text" id="captchaInput" placeholder="Enter CAPTCHA...">
-    <button id="verifyButton">Continue</button>
 </body>
 </html>
