@@ -1,14 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="refresh" content="0; url='https://sites.google.com/view/happy-script/home'" />
-    <title>Redirecting...</title>
+    <title>CAPTCHA Verification</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function generateCaptcha() {
+                let canvas = document.getElementById("captchaCanvas");
+                let ctx = canvas.getContext("2d");
+                let captcha = Math.floor(1000 + Math.random() * 9000).toString();
+                
+                canvas.width = 120;
+                canvas.height = 50;
+                
+                ctx.fillStyle = "lightgray";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.font = "bold 30px Arial";
+                ctx.fillStyle = "black";
+                ctx.textBaseline = "middle";
+                
+                for (let i = 0; i < captcha.length; i++) {
+                    let x = 10 + i * 25;
+                    let y = 25 + Math.random() * 10 - 5;
+                    let angle = Math.random() * 0.4 - 0.2;
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(angle);
+                    ctx.fillText(captcha[i], 0, 0);
+                    ctx.restore();
+                }
+                
+                for (let i = 0; i < 5; i++) {
+                    ctx.strokeStyle = "rgba(0,0,0,0.3)";
+                    ctx.beginPath();
+                    ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                    ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                    ctx.stroke();
+                }
+                
+                document.getElementById("captchaInput").value = "";
+                return captcha;
+            }
+            
+            let currentCaptcha = generateCaptcha();
+            let encodedLink = atob("aHR0cHM6Ly9zaXRlcy5nb29nbGUuY29tL3ZpZXcvaGFwcHktc2NyaXB0L2hvbWU="); // https://sites.google.com/view/happy-script/home
+            
+            document.getElementById("verifyButton").addEventListener("click", function () {
+                let userInput = document.getElementById("captchaInput").value;
+                if (userInput == currentCaptcha) {
+                    window.location.href = encodedLink;
+                } else {
+                    alert("Incorrect CAPTCHA! Please try again.");
+                    currentCaptcha = generateCaptcha();
+                }
+            });
+        });
+    </script>
 </head>
 <body>
-    <h2>Redirecting...</h2>
-    <p>If you are not redirected automatically, click the button below:</p>
-    <a href="https://sites.google.com/view/happy-script/home">
-        <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Continue</button>
-    </a>
+    <h2>CAPTCHA Verification</h2>
+    <p>Enter the number shown below to continue:</p>
+    <canvas id="captchaCanvas" width="120" height="50" style="border:1px solid #000;"></canvas>
+    <br><br>
+    <input type="text" id="captchaInput" placeholder="Enter CAPTCHA...">
+    <button id="verifyButton">Continue</button>
 </body>
 </html>
