@@ -7,22 +7,28 @@
             function generateCaptcha() {
                 let canvas = document.getElementById("captchaCanvas");
                 let ctx = canvas.getContext("2d");
-                let captcha = Math.floor(1000 + Math.random() * 9000).toString();
+                let numbers = "0123456789";
+                let captcha = "";
                 
-                canvas.width = 120;
-                canvas.height = 50;
+                for (let i = 0; i < 7; i++) {
+                    captcha += numbers.charAt(Math.floor(Math.random() * numbers.length));
+                }
+                
+                canvas.width = 200;
+                canvas.height = 80;
                 
                 ctx.fillStyle = "lightgray";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                ctx.font = "bold 30px Arial";
+                let fonts = ["bold 35px Arial", "italic 34px Verdana", "bold 36px Courier", "italic 33px Times", "bold 37px Georgia"];
                 ctx.fillStyle = "black";
                 ctx.textBaseline = "middle";
                 
                 for (let i = 0; i < captcha.length; i++) {
-                    let x = 10 + i * 25;
-                    let y = 25 + Math.random() * 10 - 5;
-                    let angle = Math.random() * 0.4 - 0.2;
+                    let x = 15 + i * 25;
+                    let y = 40 + Math.random() * 15 - 7;
+                    let angle = Math.random() * 0.6 - 0.3;
+                    ctx.font = fonts[i % fonts.length];
                     ctx.save();
                     ctx.translate(x, y);
                     ctx.rotate(angle);
@@ -30,7 +36,7 @@
                     ctx.restore();
                 }
                 
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 10; i++) {
                     ctx.strokeStyle = "rgba(0,0,0,0.3)";
                     ctx.beginPath();
                     ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
@@ -59,8 +65,8 @@
 </head>
 <body>
     <h2>CAPTCHA Verification</h2>
-    <p>Enter the number shown below to continue:</p>
-    <canvas id="captchaCanvas" width="120" height="50" style="border:1px solid #000;"></canvas>
+    <p>Enter the code shown below to continue:</p>
+    <canvas id="captchaCanvas" width="200" height="80" style="border:1px solid #000;"></canvas>
     <br><br>
     <input type="text" id="captchaInput" placeholder="Enter CAPTCHA...">
     <button id="verifyButton">Continue</button>
