@@ -88,8 +88,6 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 let fonts = ["bold 40px Arial", "italic 38px Verdana", "bold 42px Courier", "italic 36px Times", "bold 43px Georgia"];
-                ctx.fillStyle = "black";
-                ctx.textBaseline = "middle";
                 
                 for (let i = 0; i < captcha.length; i++) {
                     let x = 30 + i * 35;
@@ -99,12 +97,31 @@
                     ctx.save();
                     ctx.translate(x, y);
                     ctx.rotate(angle);
+                    
+                    if (Math.random() > 0.5) {
+                        ctx.globalAlpha = 0.5; // Làm mờ ngẫu nhiên vài số
+                    } else {
+                        ctx.globalAlpha = 1;
+                    }
+
+                    ctx.fillStyle = "black";
                     ctx.fillText(captcha[i], 0, 0);
                     ctx.restore();
+                    ctx.globalAlpha = 1;
                 }
-                
-                for (let i = 0; i < 15; i++) {
-                    ctx.strokeStyle = "rgba(0,0,0,0.3)";
+
+                // Thêm nhiều nhiễu nền
+                for (let i = 0; i < 50; i++) {
+                    let x = Math.random() * canvas.width;
+                    let y = Math.random() * canvas.height;
+                    ctx.fillStyle = "rgba(0,0,0,0.3)";
+                    ctx.fillRect(x, y, 2, 2);
+                }
+
+                // Thêm nhiều đường kẻ ngẫu nhiên
+                for (let i = 0; i < 20; i++) {
+                    ctx.strokeStyle = "rgba(0,0,0,0.4)";
+                    ctx.lineWidth = Math.random() * 2;
                     ctx.beginPath();
                     ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
                     ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
