@@ -9,26 +9,30 @@
                 let ctx = canvas.getContext("2d");
                 let numbers = "0123456789";
                 let captcha = "";
-                
+
                 for (let i = 0; i < 7; i++) {
                     captcha += numbers.charAt(Math.floor(Math.random() * numbers.length));
                 }
-                
+
                 canvas.width = 200;
                 canvas.height = 80;
-                
+
+                // Tạo background có texture nhiễu
                 ctx.fillStyle = "lightgray";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                let fonts = ["bold 35px Arial", "italic 34px Verdana", "bold 36px Courier", "italic 33px Times", "bold 37px Georgia"];
-                ctx.fillStyle = "black";
+                let fonts = ["bold 38px Arial", "italic 40px Verdana", "bold 39px Courier New"];
                 ctx.textBaseline = "middle";
                 
                 for (let i = 0; i < captcha.length; i++) {
                     let x = 15 + i * 25;
-                    let y = 40 + Math.random() * 15 - 7;
-                    let angle = Math.random() * 0.6 - 0.3;
-                    ctx.font = fonts[i % fonts.length];
+                    let y = 40 + Math.random() * 20 - 10;  // Rung nhẹ vị trí chữ
+                    let angle = Math.random() * 1.2 - 0.6;  // Nghiêng mạnh hơn
+                    ctx.font = fonts[Math.floor(Math.random() * fonts.length)];
+                    
+                    // Tạo độ trong suốt khác nhau cho mỗi chữ số
+                    ctx.fillStyle = `rgba(0, 0, 0, ${0.6 + Math.random() * 0.4})`;
+                    
                     ctx.save();
                     ctx.translate(x, y);
                     ctx.rotate(angle);
@@ -36,21 +40,30 @@
                     ctx.restore();
                 }
                 
-                for (let i = 0; i < 10; i++) {
-                    ctx.strokeStyle = "rgba(0,0,0,0.3)";
+                // Thêm đường nhiễu ngẫu nhiên
+                for (let i = 0; i < 15; i++) {
+                    ctx.strokeStyle = `rgba(0,0,0,${Math.random() * 0.5 + 0.2})`;
                     ctx.beginPath();
                     ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
                     ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
                     ctx.stroke();
                 }
-                
+
+                // Thêm chấm nhiễu
+                for (let i = 0; i < 150; i++) {
+                    let x = Math.random() * canvas.width;
+                    let y = Math.random() * canvas.height;
+                    ctx.fillStyle = `rgba(0, 0, 0, ${Math.random() * 0.5})`;
+                    ctx.fillRect(x, y, 2, 2);
+                }
+
                 document.getElementById("captchaInput").value = "";
                 return captcha;
             }
-            
+
             let currentCaptcha = generateCaptcha();
             let encodedLink = atob("aHR0cHM6Ly9zaXRlcy5nb29nbGUuY29tL3ZpZXcvaGFwcHktc2NyaXB0L2hvbWU="); // https://sites.google.com/view/happy-script/home
-            
+
             document.getElementById("verifyButton").addEventListener("click", function () {
                 let userInput = document.getElementById("captchaInput").value;
                 if (userInput == currentCaptcha) {
