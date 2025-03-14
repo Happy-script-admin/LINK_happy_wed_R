@@ -34,6 +34,34 @@
             transition: background 1s ease;
         }
 
+        /* Icon dấu tích động */
+        .check-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            position: relative;
+        }
+
+        /* SVG vòng tròn xanh */
+        .check-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: rotateCircle 0.5s ease-in-out forwards, drawCheck 0.4s ease-in-out 0.5s forwards;
+        }
+
+        /* Vòng tròn quay */
+        @keyframes rotateCircle {
+            0% { transform: rotate(0deg) scale(1); stroke-dashoffset: 100; }
+            50% { transform: rotate(180deg) scale(1.2); stroke-dashoffset: 50; }
+            100% { transform: rotate(360deg) scale(1); stroke-dashoffset: 0; }
+        }
+
         canvas {
             display: block;
             margin: 10px auto;
@@ -106,11 +134,33 @@
             font-size: 50px;
             color: red;
         }
+
+        /* Vẽ dấu tích */
+        @keyframes drawCheck {
+            0% { stroke-dashoffset: 50; }
+            100% { stroke-dashoffset: 0; }
+        }
     </style>
 </head>
 <body>
     <div class="captcha-container">
-        <h2>HAPPY script ✅</h2>
+        <h2>HAPPY script 
+            <span class="check-icon">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="green"></circle>
+                    <polyline points="7 12 10 15 17 8" stroke="green"></polyline>
+                </svg>
+            </span>
+        </h2>
+        <p>Enter the code shown below to continue:</p>
+    </div>
+</body>
+</html>
+    </style>
+</head>
+<body>
+    <div class="captcha-container">
+        <h2>HAPPY script <span class="check-icon"></span></h2>
         <p>Enter the code shown below to continue:</p>
         <canvas id="captchaCanvas" width="300" height="120"></canvas>
         <input type="text" id="captchaInput" placeholder="Enter CAPTCHA...">
