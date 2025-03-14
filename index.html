@@ -5,25 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAPTCHA Verification</title>
     <style>
+        /* Nền hiệu ứng sóng lan tỏa */
+        @keyframes waveEffect {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f2f2f2;
+            overflow: hidden;
+            background: linear-gradient(270deg, #6A0DAD, #4A00B4, #3B0080, #6A0DAD);
+            background-size: 400% 400%;
+            animation: waveEffect 12s infinite ease-in-out;
         }
+
         .captcha-container {
             text-align: center;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
+            transition: background 1s ease;
         }
+
         canvas {
             display: block;
             margin: 10px auto;
             border: 1px solid black;
         }
+
         input {
             padding: 10px;
             width: 150px;
@@ -31,6 +47,7 @@
             text-align: center;
             margin-top: 10px;
         }
+
         button {
             display: block;
             margin: 15px auto;
@@ -41,32 +58,69 @@
             transition: 0.2s;
             border-radius: 5px;
         }
+
         #verifyButton {
-            background-color: #00CC00;
+            background-color: #4A2D5D;
             color: white;
         }
+
         #verifyButton:hover {
             transform: scale(1.1);
+            background-color: #5A3472;
         }
+
         #verifyButton.loading {
             background-color: #999;
             cursor: not-allowed;
         }
+
         #verifyButton.continue {
             background-color: #0033FF;
         }
-        #verifyButton.continue:hover {
-            transform: scale(1.1);
+
+        /* Hiệu ứng sai CAPTCHA */
+        .error-message {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 1);
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .error-message.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .error-icon {
+            font-size: 50px;
+            color: red;
         }
     </style>
 </head>
 <body>
     <div class="captcha-container">
-        <h2>HAPPY script ✅</h2>
+        <h2>HAPPY script ⬜</h2>
         <p>Enter the code shown below to continue:</p>
         <canvas id="captchaCanvas" width="300" height="120"></canvas>
         <input type="text" id="captchaInput" placeholder="Enter CAPTCHA...">
         <button id="verifyButton">OK</button>
+
+        <!-- Thông báo lỗi -->
+        <div class="error-message" id="errorMessage">
+            <div class="error-icon">🚫</div>
+            <p>Wrong code! Please try again.</p>
+        </div>
     </div>
 
     <script>
@@ -76,19 +130,19 @@
                 let ctx = canvas.getContext("2d");
                 let numbers = "0123456789";
                 let captcha = "";
-                
+
                 for (let i = 0; i < 7; i++) {
                     captcha += numbers.charAt(Math.floor(Math.random() * numbers.length));
                 }
-                
+
                 canvas.width = 300;
                 canvas.height = 120;
-                
+
                 ctx.fillStyle = "lightgray";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
+
                 let fonts = ["bold 40px Arial", "italic 38px Verdana", "bold 42px Courier", "italic 36px Times", "bold 43px Georgia"];
-                
+
                 for (let i = 0; i < captcha.length; i++) {
                     let x = 30 + i * 35;
                     let y = 60 + Math.random() * 20 - 10;
@@ -97,9 +151,9 @@
                     ctx.save();
                     ctx.translate(x, y);
                     ctx.rotate(angle);
-                    
+
                     if (Math.random() > 0.5) {
-                        ctx.globalAlpha = 0.5; // Làm mờ ngẫu nhiên vài số
+                        ctx.globalAlpha = 0.5;
                     } else {
                         ctx.globalAlpha = 1;
                     }
@@ -110,7 +164,6 @@
                     ctx.globalAlpha = 1;
                 }
 
-                // Thêm nhiều nhiễu nền
                 for (let i = 0; i < 50; i++) {
                     let x = Math.random() * canvas.width;
                     let y = Math.random() * canvas.height;
@@ -118,7 +171,6 @@
                     ctx.fillRect(x, y, 2, 2);
                 }
 
-                // Thêm nhiều đường kẻ ngẫu nhiên
                 for (let i = 0; i < 20; i++) {
                     ctx.strokeStyle = "rgba(0,0,0,0.4)";
                     ctx.lineWidth = Math.random() * 2;
@@ -127,17 +179,19 @@
                     ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
                     ctx.stroke();
                 }
-                
+
                 document.getElementById("captchaInput").value = "";
                 return captcha;
             }
-            
+
             let currentCaptcha = generateCaptcha();
             let encodedLink = atob("aHR0cHM6Ly9zaXRlcy5nb29nbGUuY29tL3ZpZXcvaGFwcHktc2NyaXB0L2hvbWU="); // https://sites.google.com/view/happy-script/home
-            
+
             document.getElementById("verifyButton").addEventListener("click", function () {
                 let userInput = document.getElementById("captchaInput").value;
                 let verifyButton = document.getElementById("verifyButton");
+                let errorMessage = document.getElementById("errorMessage");
+                let captchaContainer = document.querySelector(".captcha-container");
 
                 if (userInput == currentCaptcha) {
                     verifyButton.innerText = "Checking...";
@@ -155,8 +209,18 @@
                         });
                     }, 2000);
                 } else {
-                    alert("Incorrect CAPTCHA! Please try again.");
-                    currentCaptcha = generateCaptcha();
+                    // Hiệu ứng sai mã
+                    errorMessage.classList.add("show");
+                    captchaContainer.style.background = "white";
+
+                    setTimeout(() => {
+                        errorMessage.classList.remove("show");
+                        captchaContainer.style.background = "white";
+                        setTimeout(() => {
+                            captchaContainer.style.background = "white";
+                            currentCaptcha = generateCaptcha();
+                        }, 1000);
+                    }, 2000);
                 }
             });
         });
